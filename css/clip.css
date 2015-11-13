@@ -1,0 +1,46 @@
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('/fonts/fontawesome-webfont.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body, #gray_layout {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: FontAwesome;
+}
+
+#gray_layout, #board {
+    position: absolute;
+}
+
+#tmp, audio {
+    display: none;
+}
+
+@keyframes lighting
+{
+    0%   {opacity: 0;}
+    50%  {opacity: 0.5;}
+    100% {opacity: 0;}
+}
+
+#lighting.start {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: white;
+    animation: lighting 0.1s;
+}

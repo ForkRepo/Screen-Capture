@@ -1,0 +1,31 @@
+{
+    "manifest_version": 2,
+    "name": "Screen Capture",
+    "description": "Ctrl + Shift + 0",
+    "version": "1.0",
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
+    "icons": {
+        "48": "images/logo.png",
+        "128": "images/logo.png"
+    },
+    "commands": {
+        "start-capture": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+0"
+            },
+            "description": "Start to capture screen",
+            "global": true
+        }
+    },
+    "permissions": [
+        "tabs",
+        "clipboardWrite",
+        "unlimitedStorage",
+        "desktopCapture",
+        "background"
+    ]
+}
