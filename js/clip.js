@@ -17,8 +17,8 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
 }
 
 document.body.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-    close();
+    //e.preventDefault();
+    //close();
 }, false);
 
 function close() {
@@ -73,13 +73,44 @@ function clip() {
 }
 
 function completeClip(left, top, width, height) {
-    var newLeft, newTop, newWidth, newHeight, dtLeft, dtTop, pos = null, handle = true;
+    var newLeft, newTop, newWidth, newHeight, dtLeft, dtTop, pos = null, handle = true, moved = false;
 
     clipLayout.onmousedown = function(e) {
-        dtLeft = window.screen.height - top - height < 80 ? left + width - 130 : left + width - 120,
-        dtTop = window.screen.height - top - height < 80 ? top + height - 50 : top + height + 10;
+        dtLeft = window.screen.height - top - height < 60 ? left : left + width - 120;
+        dtTop = window.screen.height - top - height < 60 ? top - 50 : top + height + 10;
 
-        if (e.clientX > left + 6 && e.clientX < left + width - 6 &&
+        if (handle && e.clientX > dtLeft && e.clientX < dtLeft + 40 &&
+            e.clientY > dtTop && e.clientY < dtTop + 40) {
+            var ctx = clipLayout.getContext('2d');
+
+            handle = false;
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.clearRect(0, 0, clipLayout.width, clipLayout.height);
+            ctx.fillRect(0, 0, clipLayout.width, clipLayout.height);
+            ctx.clearRect((left - 2) * window.devicePixelRatio,
+                (top - 2) * window.devicePixelRatio,
+                (width + 4) * window.devicePixelRatio,
+                (height + 4) * window.devicePixelRatio);
+
+            ctx.beginPath();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#5bcbf5';
+            ctx.rect((left - 2) * window.devicePixelRatio,
+                (top - 2) * window.devicePixelRatio,
+                (width + 4) * window.devicePixelRatio,
+                (height + 4) * window.devicePixelRatio);
+            ctx.stroke();
+
+            drawToolbox(left, top, width, height);
+            startEdit(left, top, width, height);
+        } else if (e.clientX > dtLeft + 40 && e.clientX < dtLeft + 80 &&
+            e.clientY > dtTop && e.clientY < dtTop + 40) {
+            close();
+        } else if (e.clientX > dtLeft + 80 && e.clientX < dtLeft + 120 &&
+            e.clientY > dtTop && e.clientY < dtTop + 40) {
+            finishEdit(left, top, width, height);
+        } else if (e.clientX > left + 6 && e.clientX < left + width - 6 &&
             e.clientY > top + 6 && e.clientY < top + height - 6) {
             pos = {
                 x: e.clientX,
@@ -142,44 +173,14 @@ function completeClip(left, top, width, height) {
                 y: e.clientY,
                 action: 'bottomRight'
             }
-        } else if (e.clientX > left - 6 && e.clientX < left + width + 6 &&
+        } else if (width < 12 && height < 12 &&
+            e.clientX > left - 6 && e.clientX < left + width + 6 &&
             e.clientY > top - 6 && e.clientY < top + height + 6) {
             pos = {
                 x: e.clientX,
                 y: e.clientY,
                 action: 'topLeft'
             }
-        } else if (handle && e.clientX > dtLeft && e.clientX < dtLeft + 40 &&
-            e.clientY > dtTop && e.clientY < dtTop + 40) {
-            var ctx = clipLayout.getContext('2d');
-
-            handle = false;
-
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.clearRect(0, 0, clipLayout.width, clipLayout.height);
-            ctx.fillRect(0, 0, clipLayout.width, clipLayout.height);
-            ctx.clearRect((left - 2) * window.devicePixelRatio,
-                (top - 2) * window.devicePixelRatio,
-                (width + 4) * window.devicePixelRatio,
-                (height + 4) * window.devicePixelRatio);
-
-            ctx.beginPath();
-            ctx.lineWidth = 6;
-            ctx.strokeStyle = '#5bcbf5';
-            ctx.rect((left - 2) * window.devicePixelRatio,
-                (top - 2) * window.devicePixelRatio,
-                (width + 4) * window.devicePixelRatio,
-                (height + 4) * window.devicePixelRatio);
-            ctx.stroke();
-
-            drawToolbox(left, top, width, height);
-            startEdit(left, top, width, height);
-        } else if (e.clientX > dtLeft + 40 && e.clientX < dtLeft + 80 &&
-            e.clientY > dtTop && e.clientY < dtTop + 40) {
-            close();
-        } else if (e.clientX > dtLeft + 80 && e.clientX < dtLeft + 120 &&
-            e.clientY > dtTop && e.clientY < dtTop + 40) {
-            finishEdit(left, top, width, height);
         }
     };
 
@@ -187,6 +188,8 @@ function completeClip(left, top, width, height) {
         if (null === pos || false === handle) {
             return;
         }
+
+        moved = true;
 
         if ('move' === pos.action) {
             newLeft = left + e.clientX - pos.x;
@@ -245,7 +248,6 @@ function completeClip(left, top, width, height) {
     };
 
     clipLayout.onmouseup = function(e) {
-        pos = null;
         newLeft = newWidth < 0 ? newLeft + newWidth : newLeft;
         newTop = newHeight < 0 ? newTop + newHeight : newTop;
 
@@ -254,8 +256,13 @@ function completeClip(left, top, width, height) {
             top = newTop;
             width = Math.abs(newWidth);
             height = Math.abs(newHeight);
-            drawToolbox(left, top, width, height);
+            if (moved !== false) {
+                drawToolbox(left, top, width, height);
+            }
         }
+
+        pos = null;
+        moved = false;
     };
 
     clipLayout.ondblclick = function(e) {
@@ -337,8 +344,8 @@ function drawClip(left, top, width, height) {
 
 function drawToolbox(left, top, width, height) {
     var ctx = clipLayout.getContext('2d'),
-        dtLeft = (window.screen.height - top - height < 80 ? left + width - 130 : left + width - 120) * window.devicePixelRatio,
-        dtTop = (window.screen.height - top - height < 80 ? top + height - 50 : top + height + 10) * window.devicePixelRatio;
+        dtLeft = (window.screen.height - top - height < 60 ? left : left + width - 120) * window.devicePixelRatio,
+        dtTop = (window.screen.height - top - height < 60 ? top - 50 : top + height + 10) * window.devicePixelRatio;
 
     var gradient = ctx.createLinearGradient(0, dtTop, 0, dtTop + 40 * window.devicePixelRatio);
     gradient.addColorStop(0, '#404040');
@@ -350,7 +357,7 @@ function drawToolbox(left, top, width, height) {
     ctx.beginPath();
     ctx.roundRect(dtLeft, dtTop, 120 * window.devicePixelRatio, 40 * window.devicePixelRatio, 3 * window.devicePixelRatio);
     ctx.save();
-    ctx.shadowColor = '#555';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
     ctx.shadowBlur = 20;
     ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
