@@ -17,8 +17,9 @@ CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
 }
 
 document.body.addEventListener('contextmenu', function(e) {
-    //e.preventDefault();
-    //close();
+    e.preventDefault();
+    close();
+    return false;
 }, false);
 
 function close() {
