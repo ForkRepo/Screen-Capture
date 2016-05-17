@@ -1,0 +1,14 @@
+{
+   "extDesp": {
+      "message": "通过快捷键Ctrl + Shift + 1 唤起屏幕截图，并且可以选择其中一个区域，并进行编辑。"
+   },
+   "extName": {
+      "message": "极简屏幕截图"
+   },
+   "waiting": {
+      "message": "请稍等…"
+   },
+   "start": {
+      "message": "开始屏幕截图"
+   }
+}

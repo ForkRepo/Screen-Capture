@@ -1,0 +1,14 @@
+{
+   "extDesp": {
+      "message": "Enter `Ctrl + Shift + 1` to Open ScreenCapture, and can Choose the Area you want."
+   },
+   "extName": {
+      "message": "Simple ScreenCapture"
+   },
+   "waiting": {
+      "message": "Waiting..."
+   },
+   "start": {
+      "message": "Start ScreenCapture"
+   }
+}
