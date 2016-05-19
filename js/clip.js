@@ -341,6 +341,15 @@ function drawClip(left, top, width, height) {
         (top + height + 3) * window.devicePixelRatio,
         8, 0, 2*Math.PI);
     ctx.fill();
+
+    // 绘制大小
+    var text = width + " x " + height;
+    ctx.fillStyle = '#1fe845';
+    ctx.font = 20 * window.devicePixelRatio + 'px "Microsoft YaHei"';
+
+    var x = left + 15 * window.devicePixelRatio + width;
+    var y = top + 35 * window.devicePixelRatio + height;
+    ctx.fillText(text, x, y);
 }
 
 function drawToolbox(left, top, width, height) {
