@@ -11,9 +11,9 @@
     },
    "manifest_version": 2,
    "name": "__MSG_extName__",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "background": {
-        "scripts": [ "js/background.js" ]
+        "page": "layout/background.html"
     },
     "commands": {
         "start-capture": {
@@ -24,7 +24,7 @@
             "global": true
         }
     },
-    "permissions": [ "tabs", "clipboardWrite", "unlimitedStorage", "desktopCapture", "background" ],
+    "permissions": [ "tabs", "clipboardRead", "clipboardWrite", "unlimitedStorage", "desktopCapture", "background" ],
     "browser_action": {
         "default_icon": "images/logo.png",
         "default_popup": "layout/popup.html"

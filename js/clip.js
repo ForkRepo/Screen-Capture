@@ -22,6 +22,16 @@ document.body.addEventListener('contextmenu', function(e) {
     return false;
 }, false);
 
+// esc
+document.body.onkeyup  =  function(e) {
+    var keycode = e.which || e.keyCode
+    if (keycode == 27) {
+        e.preventDefault();
+        close();
+        return false;
+    }
+};
+
 function close() {
     chrome.windows.getCurrent(function (window) {
         chrome.windows.remove(window.id);
@@ -80,7 +90,7 @@ function completeClip(left, top, width, height) {
         dtLeft = window.screen.height - top - height < 60 ? left : left + width - 120;
         dtTop = window.screen.height - top - height < 60 ? top - 50 : top + height + 10;
 
-        if (handle && e.clientX > dtLeft && e.clientX < dtLeft + 40 &&
+        if (handle && e.clientX > dtLeft - 40 && e.clientX < dtLeft + 0 &&
             e.clientY > dtTop && e.clientY < dtTop + 40) {
             var ctx = clipLayout.getContext('2d');
 
@@ -104,13 +114,16 @@ function completeClip(left, top, width, height) {
             ctx.stroke();
 
             drawToolbox(left, top, width, height);
-            startEdit(left, top, width, height);
+            startEdit(left, top, width, height); //edit
+        } else if (e.clientX > dtLeft + 0 && e.clientX < dtLeft + 40 &&
+            e.clientY > dtTop && e.clientY < dtTop + 40) {
+            close(); //cancel
         } else if (e.clientX > dtLeft + 40 && e.clientX < dtLeft + 80 &&
             e.clientY > dtTop && e.clientY < dtTop + 40) {
-            close();
-        } else if (e.clientX > dtLeft + 80 && e.clientX < dtLeft + 120 &&
+            finishEdit(left, top, width, height); //ok
+        }  else if (e.clientX > dtLeft + 80 && e.clientX < dtLeft + 120 &&
             e.clientY > dtTop && e.clientY < dtTop + 40) {
-            finishEdit(left, top, width, height);
+            finishEdit(left, top, width, height, true); //save
         } else if (e.clientX > left + 6 && e.clientX < left + width - 6 &&
             e.clientY > top + 6 && e.clientY < top + height - 6) {
             pos = {
@@ -269,7 +282,7 @@ function completeClip(left, top, width, height) {
     clipLayout.ondblclick = function(e) {
         if (e.clientX > left + 6 && e.clientX < left + width - 6 &&
             e.clientY > top + 6 && e.clientY < top + height - 6) {
-            finishEdit(left, top, width, height);
+            finishEdit(left, top, width, height, true);
         }
     };
 }
@@ -277,6 +290,7 @@ function completeClip(left, top, width, height) {
 function drawClip(left, top, width, height) {
     var ctx = clipLayout.getContext('2d');
 
+    // 让中心区域半透明
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
     ctx.clearRect(0, 0, clipLayout.width, clipLayout.height);
     ctx.fillRect(0, 0, clipLayout.width, clipLayout.height);
@@ -285,61 +299,63 @@ function drawClip(left, top, width, height) {
         (width + 4) * window.devicePixelRatio,
         (height + 4) * window.devicePixelRatio);
 
+    // 截屏线
     ctx.beginPath();
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = '#5bcbf5';
-    ctx.rect((left - 2) * window.devicePixelRatio,
-        (top - 2) * window.devicePixelRatio,
-        (width + 4) * window.devicePixelRatio,
-        (height + 4) * window.devicePixelRatio);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#e69138';
+    ctx.rect((left) * window.devicePixelRatio,
+        (top) * window.devicePixelRatio,
+        (width) * window.devicePixelRatio,
+        (height) * window.devicePixelRatio);
     ctx.stroke();
 
-    ctx.fillStyle = 'white';
+    // 
+    ctx.fillStyle = '#b4a7d6';
     ctx.beginPath();
-    ctx.arc((left - 3) * window.devicePixelRatio,
-        (top - 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+    ctx.arc((left) * window.devicePixelRatio,
+        (top) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
     ctx.arc((left + width / 2) * window.devicePixelRatio,
-        (top - 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+        (top) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc((left + width + 3) * window.devicePixelRatio,
-        (top - 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+    ctx.arc((left + width) * window.devicePixelRatio,
+        (top) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc((left - 3) * window.devicePixelRatio,
+    ctx.arc((left) * window.devicePixelRatio,
         (top + height / 2) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc((left + width + 3) * window.devicePixelRatio,
+    ctx.arc((left + width) * window.devicePixelRatio,
         (top + height / 2) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+        6, 0, 2*Math.PI);
     ctx.fill();
 
-    ctx.arc((left - 3) * window.devicePixelRatio,
-        (top + height + 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+    ctx.arc((left) * window.devicePixelRatio,
+        (top + height) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
     ctx.arc((left + width / 2) * window.devicePixelRatio,
-        (top + height + 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+        (top + height) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc((left + width + 3) * window.devicePixelRatio,
-        (top + height + 3) * window.devicePixelRatio,
-        8, 0, 2*Math.PI);
+    ctx.arc((left + width) * window.devicePixelRatio,
+        (top + height) * window.devicePixelRatio,
+        6, 0, 2*Math.PI);
     ctx.fill();
 
     // 绘制大小
@@ -365,7 +381,7 @@ function drawToolbox(left, top, width, height) {
     ctx.strokeStyle = '#888';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(dtLeft, dtTop, 120 * window.devicePixelRatio, 40 * window.devicePixelRatio, 3 * window.devicePixelRatio);
+    ctx.roundRect(dtLeft - 38, dtTop, 160 * window.devicePixelRatio, 40 * window.devicePixelRatio, 3 * window.devicePixelRatio);
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
     ctx.shadowBlur = 20;
@@ -376,11 +392,13 @@ function drawToolbox(left, top, width, height) {
     ctx.stroke();
     ctx.fillStyle = '#fff';
     ctx.font = 20 * window.devicePixelRatio + 'px FontAwesome';
-    ctx.fillText("\uf040", dtLeft + 14 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio);
+    ctx.fillText("\uf040", dtLeft - 24 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio); //edit
     ctx.fillStyle = '#ff3f3f';
-    ctx.fillText("\uf00d", dtLeft + 52 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio);
+    ctx.fillText("\uf00d", dtLeft + 14 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio); //cacel
     ctx.fillStyle = '#1fe845';
-    ctx.fillText("\uf00c", dtLeft + 90 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio);
+    ctx.fillText("\uf00c", dtLeft + 52 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio); //ok
+    ctx.fillStyle = '#1fe845';
+    ctx.fillText("\uf0c7", dtLeft + 90 * window.devicePixelRatio, dtTop + 28 * window.devicePixelRatio); //save
 }
 
 function startEdit(left, top, width, height) {
@@ -407,7 +425,7 @@ function startEdit(left, top, width, height) {
     };
 }
 
-function finishEdit(left, top, width, height) {
+function finishEdit(left, top, width, height, saveimg) {
     var tmp = document.getElementById('tmp');
     tmp.width = width * devicePixelRatio;
     tmp.height = height * devicePixelRatio;
@@ -429,16 +447,32 @@ function finishEdit(left, top, width, height) {
                 height * window.devicePixelRatio);
         }
 
-        copyImageToClipboard(tmp.toDataURL());
+        finishCapture(tmp.toDataURL(), saveimg);
+        if (saveimg) {
+            saveCaptureToFile(tmp);
+        }
     }
 }
 
-function copyImageToClipboard(url){
+
+function saveCaptureToFile(canvas) {
+    canvas.toBlob(function(blob) {
+        saveAs(blob, "Screen-Capture.png");
+    });
+}
+
+function finishCapture(url, saveimg) {
+    localStorage.captured = url;
+    chrome.extension.getBackgroundPage().copyImageToClipboard();
+
     document.getElementById('lighting').className = 'start';
+    
     setTimeout(function() {
         shutter.play();
         shutter.onended = function() {
-            window.open(url, '_blank');
+            if (!saveimg) {
+                window.open(url, '_blank');
+            }
             close();
         }
     }, 500);

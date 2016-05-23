@@ -67,3 +67,18 @@ function showCapture(imageDataURL) {
         // created
     });
 }
+
+// copy image to clipboard
+function copyImageToClipboard () {
+    var img = document.createElement('img');
+    img.src = localStorage.captured;
+    document.body.appendChild(img);
+    var r = document.createRange();
+    r.setStartBefore(img);
+    r.setEndAfter(img);
+    r.selectNode(img);
+    var sel = window.getSelection();
+    sel.addRange(r);
+    document.execCommand('Copy');
+    document.body.removeChild(img);
+}
